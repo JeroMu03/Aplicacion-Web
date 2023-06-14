@@ -19,12 +19,12 @@ def bienvenida():
             if request.form['tipo'] == 'padre':
                 padre = Padre.query.filter_by(correo=request.form['mail']).first()
                 if(padre is not None):
-                    print(padre)
                     passver = PasswordVer(request.form['contra'])
                     if(passver.validarPassword(padre.clave)):
+                        session["id"] = padre.id
                         session["mail"] = padre.correo
                         session["tipo"] = request.form['tipo']
-                        return render_template('menupadre.html', datos=[padre.nombre,padre.apellido])
+                        return render_template('menupadre.html', datos=[padre.nombre,padre.apellido, session["tipo"]])
                 flash('Verifica tus credenciales de acceso, Email o contraseña inválidos')
                 return render_template('login.html')
             else:
@@ -48,6 +48,7 @@ def logout():
     session.pop('mail')
     session.pop('tipo')
     return redirect(url_for('usuario'))
+
 
 #@app.route('/inasistencias')
 #def asistencia():
