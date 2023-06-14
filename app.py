@@ -49,6 +49,9 @@ def logout():
     session.pop('tipo')
     return redirect(url_for('usuario'))
 
+@app.route('/asistencia')
+def asistencia():
+    return render_template('a.html', dato=session["id"])
 
 #@app.route('/inasistencias')
 #def asistencia():
