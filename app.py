@@ -8,30 +8,73 @@ app.config.from_pyfile('config.py')
 from models import db
 from models import Asistencia, Curso, Estudiante, Padre, Preceptor
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/registrar_asistencia', methods=['GET', 'POST'])
+def registrar_asistencia():
+    if request.method == 'POST':
+        id_curso = request.form['curso']
+        fecha = request.form['fecha']
+        codigo = int(request.form['codigo'])
+        asistio = request.form['asistio']
+        justificacion = request.form['justificacion']
+
+        estudiantes = obtener_estudiantes_curso(id_curso)
+
+        for estudiante in estudiantes:
+            id_estudiante = estudiante.id
+            registrar_asistencia(id_estudiante, fecha, codigo, asistio, justificacion)
+
+        return "Asistencia registrada exitosamente"
+
+    else:
+        cursos = obtener_cursos_asignados(Preceptor.id)
+
+        return render_template('registrarasistencia.html', cursos=cursos)
+
+def obtener_cursos_asignados(id_preceptor):
+    preceptor = Preceptor.query.get(id_preceptor)
+    cursos_asignados = preceptor.cursos
+    return cursos_asignados
+
+def obtener_estudiantes_curso(id_curso):
+    estudiantes = Estudiante.query.filter_by(idcurso=id_curso).order_by(Estudiante.apellido, Estudiante.nombre).all()
+    return estudiantes
+
+def registrar_asistencia(id_estudiante, fecha, codigo, asistio, justificacion):
+    asistencia = Asistencia(
+        fecha=fecha,
+        codigo=codigo,
+        asistio=asistio,
+        justificacion=justificacion,
+        idestudiante=id_estudiante
+    )
+    db.session.add(asistencia)
+    db.session.commit()
+
+@app.route('/',) #PAGINA DE INICIO
 def usuario():
     return render_template('login.html')
 
-@app.route('/bienvenida', methods = ['POST', 'GET'])
+@app.route('/bienvenida', methods = ['POST', 'GET']) #LOGIN
 def bienvenida():
     if request.method == "POST":
         if request.form['mail'] and request.form['contra'] and request.form['tipo']:
-            if request.form['tipo'] == 'padre':
-                padre = Padre.query.filter_by(correo=request.form['mail']).first()
-                if(padre is not None):
-                    passver = PasswordVer(request.form['contra'])
-                    if(passver.validarPassword(padre.clave)):
+            if request.form['tipo'] == 'padre': #EVALUA EL TIPO, SI ES TIPO PADRE:
+                padre = Padre.query.filter_by(correo=request.form['mail']).first() #FILTRA EN LA BASE DE DATOS CON EL MAIL Y OBTIENE EL PADRE
+                if(padre is not None): #SI EXISTE LA CUENTA:
+                    passver = PasswordVer(request.form['contra']) #VERIFICAMOS LA CONTRASE;A CON EL CIFRADO
+                    if(passver.validarPassword(padre.clave)): #SI ES CORRECTA, GUARDAMOS LA SESSION Y ENTRAMOS AL CAMPUS
                         session["id"] = padre.id
                         session["mail"] = padre.correo
                         session["tipo"] = request.form['tipo']
                         return render_template('menupadre.html', datos=[padre.nombre,padre.apellido, session["tipo"]])
-                flash('Verifica tus credenciales de acceso, Email o contraseña inválidos')
+                flash('Verifica tus credenciales de acceso, Email o contraseña inválidos') #SI NO SALTA UN FLASH INDICANDO EL ERROR
                 return render_template('login.html')
-            else:
-                preceptor = Preceptor.query.filter_by(correo=request.form['mail']).first()
-                if(type(preceptor) is not None):
+            else: #SI NO ES TIPO PADRE, ENTONCES SERA TIPO PRECEPTOR
+                preceptor = Preceptor.query.filter_by(correo=request.form['mail']).first() #FILTRA EN LA BASE DE DATOS CON EL MAIL Y OBTIENE EL PRECEPTOR
+                if(type(preceptor) is not None): #SI EXISTE LA CUENTA
                     passver = PasswordVer(request.form['contra'])
                     if(passver.validarPassword(preceptor.clave)):
+                        session["id"] = preceptor.id
                         session["mail"] = preceptor.correo
                         session["tipo"] = request.form['tipo']
                         return render_template('menupreceptor.html', datos=[preceptor.nombre,preceptor.apellido])
@@ -42,58 +85,38 @@ def bienvenida():
             return render_template('login.html')
     else:
         return render_template('login.html')
-    
-@app.route('/logout')
+
+@app.route('/logout') #SE CIERRA LA SESION
 def logout():
+    session.pop('id')
     session.pop('mail')
     session.pop('tipo')
     return redirect(url_for('usuario'))
 
-@app.route('/asistencia')
+@app.route('/asistencia') #LANDING PAGE DE LA ASISTENCIA
 def asistencia():
-    return render_template('a.html', dato=session["id"])
+    padre = Padre.query.filter_by(id=session["id"]).first()
+    estudiante = padre.estudiantes
+    return render_template('a.html', dato=estudiante)
+
+@app.route('/consasistencia', methods=["GET", "POST"]) #SE CONSULTA LA ASISTENCIA PARA EL HIJO SOLICITADO, DE LOS DATOS QUE SE INTRODUCEN EN /asistencia
+def consasistencia():
+    if request.method == "POST":
+        if request.form['hijo']:
+            estudiante = Estudiante.query.filter_by(id=request.form['hijo']).first()
+            i=0
+            for i in range(len(estudiante.asistencia_alum)):
+                i+=1
+            return render_template('b.html',nom=estudiante.nombre,ap=estudiante.apellido,datos=estudiante.asistencia_alum, indice=i)
+    else:
+        return redirect(url_for('asistencia'))
+
+
 
 #@app.route('/inasistencias')
 #def asistencia():
 #Fin Log out
     
-#@app.route('/informe_detallado')
-#def informe_detallado():
-    #if 'user_id' not in session:
-        #return redirect('/login')
 
-    #estudiantes = Estudiante.query.order_by(Estudiante.apellido, Estudiante.nombre).all()
-    #informe = []
-
-    #for estudiante in estudiantes:
-        #asistencias_aula = Asistencia.query.filter_by(id_estudiante=estudiante.id, codigo= 1, asistio=True).count()
-        #asistencias_edfisica = Asistencia.query.filter_by(id_estudiante=estudiante.id, codigo= 2 , asistio=True).count()
-
-        #inasistencias_aula_justificadas = Asistencia.query.filter_by(id_estudiante=estudiante.id, codigo= 1 , asistio=False, justificacion.isnot(None)).count()
-        #inasistencias_aula_injustificadas = Asistencia.query.filter_by(id_estudiante=estudiante.id, codigo= 1 , asistio=False, justificacion.is_(None)).count()
-
-        #inasistencias_edfisica_justificadas = Asistencia.query.filter_by(id_estudiante=estudiante.id, codigo= 2 , asistio=False, justificacion.isnot(None)).count()
-        #inasistencias_edfisica_injustificadas = Asistencia.query.filter_by(id_estudiante=estudiante.id, codigo= 2 , asistio=False, justificacion.is_(None)).count()
-
-        #total_inasistencias = (
-            #inasistencias_aula_justificadas +
-            #inasistencias_aula_injustificadas +
-            #(inasistencias_edfisica_justificadas * 0.5) +
-            #(inasistencias_edfisica_injustificadas * 0.5) )
-
-        #informe.append({
-            #'estudiante': estudiante,
-            #'asistencias_aula': asistencias_aula,
-            #'asistencias_edfisica': asistencias_edfisica,
-            #'inasistencias_aula_justificadas': inasistencias_aula_justificadas,
-            #'inasistencias_aula_injustificadas': inasistencias_aula_injustificadas,
-            #'inasistencias_edfisica_justificadas': inasistencias_edfisica_justificadas,
-            #'inasistencias_edfisica_injustificadas': inasistencias_edfisica_injustificadas,
-            #'total_inasistencias': total_inasistencias })
-
-    #informe_ordenado = sorted(informe, key=lambda x: x['estudiante'].apellido)
-
-    #return render_template('informe_detallado.html', informe=informe_ordenado)
-    
 if __name__ == '__main__': 
     app.run(debug = True)
