@@ -93,7 +93,7 @@
             </a>
             <a class="navbar-brand">
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-              <li><a  href="/bienvenida" method="post" class="btn btn btn-dark"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-left-square-fill" viewBox="0 0 16 16">
+              <li><a  href="javascript:history.back()" method="post" class="btn btn btn-dark"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-left-square-fill" viewBox="0 0 16 16">
                 <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm10.5 10V4a.5.5 0 0 0-.832-.374l-4.5 4a.5.5 0 0 0 0 .748l4.5 4A.5.5 0 0 0 10.5 12z"/>
               </svg></a></li>
             </ul>
@@ -112,15 +112,42 @@
         </div>
       </header>
 
-      <h1>Hijos inscriptos:</h1>
-
-      <form action="/consasistencia" method="post">
-        <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="hijo" name="hijo">
-          <option value="{{dato.id}}">{{dato.nombre}} {{dato.apellido}}</option>
-        </select>
-        <button class="btn btn-primary w-100 py-2"  type="submit">Consultar asistencia</button>
-      </form>
+      <h1>Ingrese los datos para el informe de inasistencia:</h1>
       
+      <form action="/consasistenciafecha" method="post">
+        <div class="form-floating">
+          <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="curso" name="curso">
+            {%for i in range(0,6) %}
+            <option>{{i+1}}</option>
+            {%endfor%}
+          </select>
+          <label for="curso">Seleccione el curso:</label>
+        </div>
+        <div class="form-floating">
+          <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="division" name="division">
+            {%for i in range(0,2) %}
+            <option>{{i+1}}</option>
+            {%endfor%}
+          </select>
+          <label for="division">Seleccione la division:</label>
+        </div>
+        <div class="form-floating">
+          <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="clase" name="clase">
+            <option value="1">Aula</option>
+            <option value="2">Ed. Fisica</option>
+          </select>
+          <label for="clase">Seleccione el tipo de clase:</label>
+        </div>
+        <div class="form-floating">
+          <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="fecha" name="fecha">
+            <option>8/5/2023</option>
+            <option>9/5/2023</option>
+          </select>
+          <label for="fecha">Seleccione la fecha:</label>
+        </div>
+          <button class="btn btn-primary w-100 py-2"  type="submit">Consultar asistencia</button>
+      </form>
+
 </main>
 <script src="/static/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     </body>

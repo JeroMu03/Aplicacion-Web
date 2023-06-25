@@ -103,16 +103,43 @@ def asistencia():
 def consasistencia():
     if request.method == "POST":
         if request.form['hijo']:
-            estudiante = Estudiante.query.filter_by(id=request.form['hijo']).first()
+            estudiante = Estudiante.query.filter_by(id=request.form['hijo']).first() #FILTRA HIJO POR ID
             i=0
-            for i in range(len(estudiante.asistencia_alum)):
+            falta=0.0
+            for i in range(len(estudiante.asistencia_alum)): #CANTTIDAD DE FALTAS + COMPUTO DE ASISTENCIA
                 i+=1
-            return render_template('b.html',nom=estudiante.nombre,ap=estudiante.apellido,datos=estudiante.asistencia_alum, indice=i)
+                if estudiante.asistencia_alum[i-1].codigoclase == 1:
+                    falta+=1.0
+                else:
+                    falta+=0.5
+            return render_template('b.html',nom=estudiante.nombre,ap=estudiante.apellido,datos=estudiante.asistencia_alum, indice=i, faltas=falta)
     else:
         return redirect(url_for('asistencia'))
 
+@app.route('/fecha')
+def fecha():
+    return render_template('fecha.html')
 
-
+@app.route('/consasistenciafecha', methods=["GET", "POST"])
+def fechacons():
+    lista=[]
+    if request.form['curso'] and request.form['division'] and request.form['clase'] and request.form['fecha']:
+            curso= Curso.query.filter_by(anio=request.form['curso'], division=request.form['division']).first()
+            estudiantes=curso.estudiante
+            c=0
+            x=0
+            for i in range(len(curso.estudiante)):
+                x+=1
+                for b in range(len(estudiantes[i].asistencia_alum)):
+                    if estudiantes[i].asistencia_alum[b].fecha==request.form['fecha'] and estudiantes[i].asistencia_alum[b].codigoclase==int(request.form['clase']):
+                        c+=1
+                        lista.append(estudiantes[i].asistencia_alum[b])
+                        print(lista)
+            return render_template('fechacons.html',  a=c, listaasis=lista, estudiantes=curso.estudiante, d=x)
+                
+        
+        
+        
 #@app.route('/inasistencias')
 #def asistencia():
 #Fin Log out
