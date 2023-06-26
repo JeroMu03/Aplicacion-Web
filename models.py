@@ -5,11 +5,11 @@ from sqlalchemy.orm import relationship
 db = SQLAlchemy(app)
 
 class Asistencia(db.Model):
-    __tablename__= 'asistencia' 
+    __tablename__ = 'asistencia'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     fecha = db.Column(db.String(50), nullable=False)
     codigoclase = db.Column(db.Integer, nullable=False)
-    asistio = db.Column(db.String, nullable=False)
+    asistio = db.Column(db.Boolean, nullable=False)
     justificacion = db.Column(db.String(50), nullable=False)
     idestudiante = db.Column(db.Integer, db.ForeignKey('estudiante.id'))
     

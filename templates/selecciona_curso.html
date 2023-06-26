@@ -22,14 +22,6 @@
         <label for="fecha">Fecha:</label>
         <input type="date" name="fecha" id="fecha" required>
 
-        <h2>Estudiantes:</h2>
-        {% for estudiante in estudiantes %}
-            <div>
-                <input type="checkbox" id="estudiante_{{ estudiante.id }}" name="estudiante_{{ estudiante.id }}" value="s">
-                <label for="estudiante_{{ estudiante.id }}">{{ estudiante.nombre }} {{ estudiante.apellido }}</label>
-            </div>
-        {% endfor %}
-
         <button type="submit">Guardar Asistencia</button>
     </form>
 </body>
