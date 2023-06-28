@@ -8,86 +8,6 @@ app.config.from_pyfile('config.py')
 from models import db
 from models import Asistencia, Curso, Estudiante, Padre, Preceptor
 
-@app.route('/registrarasistencia', methods=['GET', 'POST'])
-def registrarasistencia():
-    if request.method == 'POST':
-        id_curso = request.form['curso']
-        cod_clase = request.form['clase']
-        fecha = request.form['fecha']
-        estudiantes = Estudiante.query.filter_by(idcurso=id_curso).order_by(Estudiante.apellido, Estudiante.nombre).all()
-
-        for estudiante in estudiantes:
-            asistio = request.form.get(f'estudiante_{estudiante.id}')
-            justificacion = ''
-
-            if asistio:
-                asistio = True
-            else:
-                asistio = False
-                justificacion = 'Clase de Aula' if cod_clase == '1' else 'Educación Física'
-
-            asistencia = Asistencia(fecha=fecha, codigoclase=cod_clase, asistio=asistio,
-                                    justificacion=justificacion, idestudiante=estudiante.id)
-
-            try:
-                db.session.add(asistencia)
-                db.session.commit()
-                flash('Asistencia registrada exitosamente.', 'success')
-            except Exception as e:
-                db.session.rollback()
-                flash('Ocurrió un error al registrar la asistencia.', 'error')
-                print(str(e))
-                return redirect(url_for('registrarasistencia'))
-
-        return redirect(url_for('dashboard'))
-
-    else:
-        cursos = obtener_cursos_asignados(Preceptor.id)
-        return render_template('selecciona_curso.html', cursos=cursos)
-def obtener_curso(id_curso):
-    curso = Curso.query.get(id_curso)
-    return curso
-def registrarasistencia(id_curso, fecha, codigoclase, asistio, justificacion,id_estudiante):
-    nueva_asistencia = Asistencia(id_curso=id_curso, fecha=fecha, codigoclase=codigoclase, asistio=asistio, justificacion=justificacion,id_estudiante=id_estudiante)
-    db.session.add(nueva_asistencia)
-    db.session.commit()
-def obtener_cursos_asignados(id_preceptor):
-    preceptor = Preceptor.query.get(id_preceptor)
-    cursos_asignados = preceptor.cursos
-    return cursos_asignados
-
-def obtener_estudiantes_curso(id_curso):
-    estudiantes = Estudiante.query.filter_by(idcurso=id_curso).order_by(Estudiante.apellido, Estudiante.nombre).all()
-    return estudiantes
-
-def generar_informe_detalles(curso, estudiantes):
-    informe = []
-    for estudiante in estudiantes:
-        asistencias_aula_presente = Asistencia.query.filter_by(idestudiante=estudiante.id, asistio=True).count()
-        asistencias_edu_presente = Asistencia.query.filter_by(idestudiante=estudiante.id, asistio=True, justificacion='Educación Física').count()
-        faltas_aula_justificadas = Asistencia.query.filter_by(idestudiante=estudiante.id, asistio=False, justificacion='Clase de Aula').count()
-        faltas_aula_injustificadas = Asistencia.query.filter_by(idestudiante=estudiante.id, asistio=False, justificacion='').count()
-        faltas_edu_justificadas = Asistencia.query.filter_by(idestudiante=estudiante.id, asistio=False, justificacion='Educación Física').count()
-        faltas_edu_injustificadas = Asistencia.query.filter_by(idestudiante=estudiante.id, asistio=False, justificacion='').count()
-
-        total_faltas = faltas_aula_justificadas + faltas_aula_injustificadas + 0.5 * (faltas_edu_justificadas + faltas_edu_injustificadas)
-
-        detalle = {
-            'estudiante': estudiante,
-            'asistencias_aula_presente': asistencias_aula_presente,
-            'asistencias_edu_presente': asistencias_edu_presente,
-            'faltas_aula_justificadas': faltas_aula_justificadas,
-            'faltas_aula_injustificadas': faltas_aula_injustificadas,
-            'faltas_edu_justificadas': faltas_edu_justificadas,
-            'faltas_edu_injustificadas': faltas_edu_injustificadas,
-            'total_faltas': total_faltas
-        }
-        informe.append(detalle)
-
-    informe_ordenado = sorted(informe, key=lambda x: (x['estudiante'].apellido.lower(), x['estudiante'].nombre.lower()))
-
-    return informe_ordenado
-
 @app.route('/',) #PAGINA DE INICIO
 def usuario():
     return render_template('login.html')
@@ -135,7 +55,7 @@ def logout():
 def asistencia():
     padre = Padre.query.filter_by(id=session["id"]).first()
     estudiante = padre.estudiantes
-    return render_template('a.html', dato=estudiante)
+    return render_template('asistencia.html', dato=estudiante)
 
 @app.route('/consasistencia', methods=["GET", "POST"]) #SE CONSULTA LA ASISTENCIA PARA EL HIJO SOLICITADO, DE LOS DATOS QUE SE INTRODUCEN EN /asistencia
 def consasistencia():
@@ -150,7 +70,7 @@ def consasistencia():
                     falta+=1.0
                 else:
                     falta+=0.5
-            return render_template('b.html',nom=estudiante.nombre,ap=estudiante.apellido,datos=estudiante.asistencia_alum, indice=i, faltas=falta)
+            return render_template('consasistencia.html',nom=estudiante.nombre,ap=estudiante.apellido,datos=estudiante.asistencia_alum, indice=i, faltas=falta)
     else:
         return redirect(url_for('asistencia'))
 
@@ -172,23 +92,24 @@ def fechacons():
                     if estudiantes[i].asistencia_alum[b].fecha==request.form['fecha'] and estudiantes[i].asistencia_alum[b].codigoclase==int(request.form['clase']):
                         c+=1
                         lista.append(estudiantes[i].asistencia_alum[b])
-                        print(lista)
             return render_template('fechacons.html',  a=c, listaasis=lista, estudiantes=curso.estudiante, d=x)
 
-@app.route('/informe_detalles', methods=['GET', 'POST'])
-def informe_detalles():
-    if request.method == 'POST':
-        id_curso = request.form['curso']
-        curso = obtener_curso(id_curso)
-        estudiantes = obtener_estudiantes_curso(id_curso)
-        informe = generar_informe_detalles(curso, estudiantes)
-        return render_template('informe_detalles.html', curso=curso, informe=informe)
-    else:
-        id_preceptor = session["id"]
-        cursos = obtener_cursos_asignados(id_preceptor)
-        return render_template('seleccionar_curso.html', cursos=cursos, selected_curso=request.args.get('curso_id'))
+@app.route('/informeprece')
+def informeprece():
+    preceptor=Preceptor.query.filter_by(id=session["id"]).first()
+    return render_template('informeprece.html', cursos=preceptor.cursos, r=range(len(preceptor.cursos)))
 
-     
+@app.route('/consinformeprece',methods=["GET", "POST"])
+def consinformeprece():
+    if request.form['cursoid']:
+        cursos=Curso.query.filter_by(id=request.form['cursoid'])
+        estudiantes=cursos.estudiante
+        es=0
+        for i in range(len(estudiantes)):
+            es+=1
+            asis=estudiantes[i].asistencia
+            for i in range(len(asis)):
+                
 #@app.route('/inasistencias')
 #def asistencia():
 #Fin Log out
