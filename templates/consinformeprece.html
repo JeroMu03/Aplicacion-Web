@@ -93,15 +93,17 @@
             </a>
             <a class="navbar-brand">
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-              <li><a  href="/bienvenida" method="post" class="btn btn btn-dark"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-left-square-fill" viewBox="0 0 16 16">
-                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm10.5 10V4a.5.5 0 0 0-.832-.374l-4.5 4a.5.5 0 0 0 0 .748l4.5 4A.5.5 0 0 0 10.5 12z"/>
-              </svg></a></li>
+              <li>
+                <a  href="javascript:history.back()" method="post" class="btn btn btn-dark">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-left-square-fill" viewBox="0 0 16 16">
+                    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm10.5 10V4a.5.5 0 0 0-.832-.374l-4.5 4a.5.5 0 0 0 0 .748l4.5 4A.5.5 0 0 0 10.5 12z"/>
+                  </svg>
+                </a>
+              </li>
             </ul>
 
-
-
             <div class="dropdown text-end">
-              <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false">
+              <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle text-white " data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="/static/img/perfil.jpg" alt="mdo" width="32" height="32" class="rounded-circle">
               </a>
               <ul class="dropdown-menu text-small text-bg-dark">
@@ -112,15 +114,35 @@
         </div>
       </header>
 
-      <h1>Hijos inscriptos:</h1>
+      <table class="table table-responsive container-fluid">
+        <thead>
+            <tr>
+                <th>Alumnos:</th>
+                <th>Presentes Ed. Fisica:</th>
+                <th>Presentes Aula:</th>
+                <th>Inasistencia Ed. Fisica Justificadas:</th>
+                <th>Inasistencia Ed. Fisica sin Justificacion:</th>
+                <th>Inasistencia Aula Justificadas:</th>
+                <th>Inasistencia Aula sin Justificacion:</th>
+                <th>Inasistencia Totales:</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          {%for i in range(0,indice) %}
+            <tr>
+                <td>{{est[i].apellido}} {{est[i].nombre}}</td>
+                <td>{{ fisp[i] }}</td>
+                <td>{{ aulap[i] }}</td>
+                <td>{{ fisfj[i] }}</td>
+                <td>{{ fisfi[i] }}</td>
+                <td>{{ aulafj[i] }}</td>
+                <td>{{ aulafi[i] }}</td>
+                <td>{{ inasis[i] }}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
 
-      <form action="/consasistencia" method="post">
-        <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="hijo" name="hijo">
-          <option value="{{dato.id}}">{{dato.apellido}} {{dato.nombre}}</option>
-        </select>
-        <button class="btn btn-primary w-100 py-2"  type="submit">Consultar asistencia</button>
-      </form>
-      
 </main>
 <script src="/static/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     </body>

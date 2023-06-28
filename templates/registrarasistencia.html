@@ -26,7 +26,7 @@
         {% for estudiante in estudiantes %}
             <div>
                 <input type="checkbox" id="estudiante_{{ estudiante.id }}" name="estudiante_{{ estudiante.id }}" value="s">
-                <label for="estudiante_{{ estudiante.id }}">{{ estudiante.nombre }} {{ estudiante.apellido }}</label>
+                <label for="estudiante_{{ estudiante.id }}">{{ estudiante.apellido }} {{ estudiante.nombre }}</label>
             </div>
         {% endfor %}
 

@@ -118,7 +118,7 @@
             <tr>
                 <th>Nombre</th>
                 <th>Clase</th>
-                <th>cod</th>
+                <th>Tipo de clase:</th>
                 <th>Asistio</th>
             </tr>
         </thead>
@@ -128,12 +128,18 @@
                 <td>
                   {% for b in range(0,d)%}
                     {% if estudiantes[b].id == listaasis[i].idestudiante %}
-                      {{estudiantes[b].nombre}} {{estudiantes[b].apellido}}
+                      {{estudiantes[b].apellido}} {{estudiantes[b].nombre}}
                     {% endif %}
                   {% endfor %}
                 </td>
                 <td>{{listaasis[i].fecha}}</td>
-                <td>{{listaasis[i].codigoclase}}</td>
+                <td>
+                  {% if listaasis[i].codigoclase == 1%}
+                    Aula
+                  {% else %}
+                    Ed. Fisica
+                  {% endif %}
+                </td>
                 <td>
                   {% if listaasis[i].asistio == "n" %}
                     No asistio

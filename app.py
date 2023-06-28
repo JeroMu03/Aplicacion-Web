@@ -12,7 +12,7 @@ from models import Asistencia, Curso, Estudiante, Padre, Preceptor
 def usuario():
     return render_template('login.html')
 
-@app.route('/bienvenida', methods = ['POST', 'GET']) #LOGIN
+@app.route('/inicio', methods = ['POST', 'GET']) #LOGIN
 def bienvenida():
     if request.method == "POST":
         if request.form['mail'] and request.form['contra'] and request.form['tipo']:
@@ -102,17 +102,73 @@ def informeprece():
 @app.route('/consinformeprece',methods=["GET", "POST"])
 def consinformeprece():
     if request.form['cursoid']:
-        cursos=Curso.query.filter_by(id=request.form['cursoid'])
-        estudiantes=cursos.estudiante
+        asisaula=[]
+        asisfis=[]
+        inasisaulajus=[]
+        inasisfisjus=[]
+        inasisfisinjus=[]
+        inasisaulainjus=[]
+        inas=[]
+        falta=0.0
+        aula=0
+        fis=0
+        infisjus=0
+        inaulajus=0
+        infisinjus=0
+        inaulainjus=0
         es=0
+        cursos=Curso.query.filter_by(id=request.form['cursoid']).first()
+        estudiantes=cursos.estudiante
         for i in range(len(estudiantes)):
             es+=1
-            asis=estudiantes[i].asistencia
-            for i in range(len(asis)):
-                
-#@app.route('/inasistencias')
-#def asistencia():
-#Fin Log out
+            asis=estudiantes[i].asistencia_alum
+            for b in range(len(estudiantes[i].asistencia_alum)):
+                if asis[b].codigoclase==1:
+                    if asis[b].asistio == "s":
+                        aula+=1
+                    else:
+                        if asis[b].justificacion != None:
+                            falta+=1.0
+                            inaulajus+=1
+                        else:
+                            falta+=1.0
+                            inaulainjus+=1
+                else:
+                    if asis[b].asistio == "s":
+                        fis+=1
+                    else:
+                        if asis[b].justificacion != None:
+                            falta+=0.5
+                            infisjus+=1
+                        else:
+                            falta+=0.5
+                            infisinjus+=1
+            asisaula.append(aula)
+            asisfis.append(fis)
+            inasisaulajus.append(inaulajus)
+            inasisfisjus.append(infisjus)
+            inasisfisinjus.append(infisinjus)
+            inasisaulainjus.append(inaulainjus)
+            inas.append(falta)
+            falta=0.0
+            aula=0
+            fis=0
+            infisjus=0
+            inaulajus=0
+            infisinjus=0
+            inaulainjus=0
+        return render_template("consinformeprece.html", indice=es, est=cursos.estudiante, aulap=asisaula, fisp=asisfis, aulafj=inasisaulajus, fisfj=inasisfisjus, aulafi=inasisaulainjus, fisfi=inasisfisinjus, inasis=inas)
+
+@app.route("/asiscurso")
+def curso():
+    preceptor=Preceptor.query.filter_by(id=session["id"]).first()
+    return render_template('curso.html', cursos=preceptor.cursos, r=range(len(preceptor.cursos)))
+
+@app.route("/regasiscurso", methods=["GET", "POST"])
+def regasis():
+    if request.form['cursoid']:
+        curso=Curso.query.filter_by(id=request.form['cursoid']).first()
+        return render_template('regasis.html', estudiantes=curso.estudiante, r=range(len(curso.estudiante)))
     
 
 if __name__ == '__main__': 

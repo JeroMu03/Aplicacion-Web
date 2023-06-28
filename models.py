@@ -10,7 +10,7 @@ class Asistencia(db.Model):
     fecha = db.Column(db.String(50), nullable=False)
     codigoclase = db.Column(db.Integer, nullable=False)
     asistio = db.Column(db.Integer, nullable=False)
-    justificacion = db.Column(db.String(50), nullable=False)
+    justificacion = db.Column(db.String(50), nullable=True)
     idestudiante = db.Column(db.Integer, db.ForeignKey('estudiante.id'))
     
 class Curso(db.Model):
@@ -19,7 +19,7 @@ class Curso(db.Model):
     anio = db.Column(db.Integer, nullable=False)
     division = db.Column(db.Integer, nullable=False)
     idpreceptor = db.Column(db.Integer, db.ForeignKey('preceptor.id'))
-    estudiante = relationship('Estudiante',backref='curso',cascade='all, delete-orphan', order_by="Estudiante.nombre")
+    estudiante = relationship('Estudiante',backref='curso',cascade='all, delete-orphan', order_by="Estudiante.apellido, Estudiante.nombre")
     
 class Estudiante(db.Model):
     __tablename__ = 'estudiante'
@@ -38,7 +38,7 @@ class Padre(db.Model):
     apellido = db.Column(db.String(50), nullable=False)
     correo = db.Column(db.String(100), nullable=False)
     clave = db.Column(db.String(100), nullable=False)
-    estudiantes = relationship('Estudiante',backref='padre',uselist=False, cascade='all, delete-orphan', order_by="Estudiante.nombre")
+    estudiantes = relationship('Estudiante',backref='padre',uselist=False, cascade='all, delete-orphan',order_by="Estudiante.nombre, Estudiante.apellido")
     
 class Preceptor(db.Model):
     __tablename__ = 'preceptor'
