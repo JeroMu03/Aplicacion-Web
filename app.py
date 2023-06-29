@@ -80,19 +80,22 @@ def fecha():
 
 @app.route('/consasistenciafecha', methods=["GET", "POST"])
 def fechacons():
-    lista=[]
-    if request.form['curso'] and request.form['division'] and request.form['clase'] and request.form['fecha']:
-            curso= Curso.query.filter_by(anio=request.form['curso'], division=request.form['division']).first()
-            estudiantes=curso.estudiante
-            c=0
-            x=0
-            for i in range(len(curso.estudiante)):
-                x+=1
-                for b in range(len(estudiantes[i].asistencia_alum)):
-                    if estudiantes[i].asistencia_alum[b].fecha==request.form['fecha'] and estudiantes[i].asistencia_alum[b].codigoclase==int(request.form['clase']):
-                        c+=1
-                        lista.append(estudiantes[i].asistencia_alum[b])
-            return render_template('fechacons.html',  a=c, listaasis=lista, estudiantes=curso.estudiante, d=x)
+    if request.method == "POST":
+        lista=[]
+        if request.form['curso'] and request.form['division'] and request.form['clase'] and request.form['fecha']:
+                curso= Curso.query.filter_by(anio=request.form['curso'], division=request.form['division']).first()
+                estudiantes=curso.estudiante
+                c=0
+                x=0
+                for i in range(len(curso.estudiante)):
+                    x+=1
+                    for b in range(len(estudiantes[i].asistencia_alum)):
+                        if estudiantes[i].asistencia_alum[b].fecha==request.form['fecha'] and estudiantes[i].asistencia_alum[b].codigoclase==int(request.form['clase']):
+                            c+=1
+                            lista.append(estudiantes[i].asistencia_alum[b])
+                return render_template('fechacons.html',  a=c, listaasis=lista, estudiantes=curso.estudiante, d=x)
+    else:
+        return redirect(url_for('fecha'))
 
 @app.route('/informeprece')
 def informeprece():
@@ -101,55 +104,15 @@ def informeprece():
 
 @app.route('/consinformeprece',methods=["GET", "POST"])
 def consinformeprece():
-    if request.form['cursoid']:
-        asisaula=[]
-        asisfis=[]
-        inasisaulajus=[]
-        inasisfisjus=[]
-        inasisfisinjus=[]
-        inasisaulainjus=[]
-        inas=[]
-        falta=0.0
-        aula=0
-        fis=0
-        infisjus=0
-        inaulajus=0
-        infisinjus=0
-        inaulainjus=0
-        es=0
-        cursos=Curso.query.filter_by(id=request.form['cursoid']).first()
-        estudiantes=cursos.estudiante
-        for i in range(len(estudiantes)):
-            es+=1
-            asis=estudiantes[i].asistencia_alum
-            for b in range(len(estudiantes[i].asistencia_alum)):
-                if asis[b].codigoclase==1:
-                    if asis[b].asistio == "s":
-                        aula+=1
-                    else:
-                        if asis[b].justificacion != None:
-                            falta+=1.0
-                            inaulajus+=1
-                        else:
-                            falta+=1.0
-                            inaulainjus+=1
-                else:
-                    if asis[b].asistio == "s":
-                        fis+=1
-                    else:
-                        if asis[b].justificacion != None:
-                            falta+=0.5
-                            infisjus+=1
-                        else:
-                            falta+=0.5
-                            infisinjus+=1
-            asisaula.append(aula)
-            asisfis.append(fis)
-            inasisaulajus.append(inaulajus)
-            inasisfisjus.append(infisjus)
-            inasisfisinjus.append(infisinjus)
-            inasisaulainjus.append(inaulainjus)
-            inas.append(falta)
+    if request.method == "POST":
+        if request.form['cursoid']:
+            asisaula=[]
+            asisfis=[]
+            inasisaulajus=[]
+            inasisfisjus=[]
+            inasisfisinjus=[]
+            inasisaulainjus=[]
+            inas=[]
             falta=0.0
             aula=0
             fis=0
@@ -157,7 +120,50 @@ def consinformeprece():
             inaulajus=0
             infisinjus=0
             inaulainjus=0
-        return render_template("consinformeprece.html", indice=es, est=cursos.estudiante, aulap=asisaula, fisp=asisfis, aulafj=inasisaulajus, fisfj=inasisfisjus, aulafi=inasisaulainjus, fisfi=inasisfisinjus, inasis=inas)
+            es=0
+            cursos=Curso.query.filter_by(id=request.form['cursoid']).first()
+            estudiantes=cursos.estudiante
+            for i in range(len(estudiantes)):
+                es+=1
+                asis=estudiantes[i].asistencia_alum
+                for b in range(len(estudiantes[i].asistencia_alum)):
+                    if asis[b].codigoclase==1:
+                        if asis[b].asistio == "s":
+                            aula+=1
+                        else:
+                            if asis[b].justificacion != None:
+                                falta+=1.0
+                                inaulajus+=1
+                            else:
+                                falta+=1.0
+                                inaulainjus+=1
+                    else:
+                        if asis[b].asistio == "s":
+                            fis+=1
+                        else:
+                            if asis[b].justificacion != None:
+                                falta+=0.5
+                                infisjus+=1
+                            else:
+                                falta+=0.5
+                                infisinjus+=1
+                asisaula.append(aula)
+                asisfis.append(fis)
+                inasisaulajus.append(inaulajus)
+                inasisfisjus.append(infisjus)
+                inasisfisinjus.append(infisinjus)
+                inasisaulainjus.append(inaulainjus)
+                inas.append(falta)
+                falta=0.0
+                aula=0
+                fis=0
+                infisjus=0
+                inaulajus=0
+                infisinjus=0
+                inaulainjus=0
+            return render_template("consinformeprece.html", indice=es, est=cursos.estudiante, aulap=asisaula, fisp=asisfis, aulafj=inasisaulajus, fisfj=inasisfisjus, aulafi=inasisaulainjus, fisfi=inasisfisinjus, inasis=inas)
+    else:
+        return redirect(url_for('informeprece'))
 
 @app.route("/asiscurso")
 def curso():
@@ -166,10 +172,31 @@ def curso():
 
 @app.route("/regasiscurso", methods=["GET", "POST"])
 def regasis():
-    if request.form['cursoid']:
-        curso=Curso.query.filter_by(id=request.form['cursoid']).first()
-        return render_template('regasis.html', estudiantes=curso.estudiante, r=range(len(curso.estudiante)))
+    if request.method == "POST":
+        if request.form['cursoid']:
+            curso=Curso.query.filter_by(id=request.form['cursoid']).first()
+            session["asis"]=curso.id
+            return render_template('regasis.html', estudiantes=curso.estudiante, r=range(len(curso.estudiante)))
+    else:
+        return redirect(url_for('asiscurso'))
     
-
+@app.route('/asisreg', methods=['GET', 'POST'])
+def asisreg():
+    if request.method == "POST":
+        curso=Curso.query.filter_by(id=session["asis"]).first()
+        estudiantes=curso.estudiante
+        for i in range(len(estudiantes)):
+                codcl=request.form[f'tipo{i}']
+                fech=request.form[f'fe{i}']
+                asi=request.form[f'asis{i}']
+                justi=request.form.get(f'justi{i}','')
+                asistencia= Asistencia(fecha=fech,codigoclase=int(codcl),asistio=asi, justificacion=justi, idestudiante=estudiantes[i].id)
+                db.session.add(asistencia)
+        db.session.commit()
+        flash('Asistencia cargada')
+        return render_template('regasis.html', estudiantes=curso.estudiante, r=range(len(curso.estudiante)))
+    else:
+        return redirect(url_for('regasiscurso'))
+    
 if __name__ == '__main__': 
     app.run(debug = True)

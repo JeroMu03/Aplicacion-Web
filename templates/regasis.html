@@ -4,10 +4,8 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.112.5">
-    <title>Features · Bootstrap v5.3</title>
+    <link rel="icon" type="image/png" href="/static/img/logosanmiguel.svg">
+    <title>Registrar Asistencia</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/features/">
 
@@ -93,7 +91,7 @@
             </a>
             <a class="navbar-brand">
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-              <li><a  href="/bienvenida" method="post" class="btn btn btn-dark"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-left-square-fill" viewBox="0 0 16 16">
+              <li><a  href="javascript:history.back()" method="post" class="btn btn btn-dark"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-caret-left-square-fill" viewBox="0 0 16 16">
                 <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm10.5 10V4a.5.5 0 0 0-.832-.374l-4.5 4a.5.5 0 0 0 0 .748l4.5 4A.5.5 0 0 0 10.5 12z"/>
               </svg></a></li>
             </ul>
@@ -112,65 +110,62 @@
         </div>
       </header>
 
-      <h2>Alumno:</h2>
+      <h2>Cargar asistencia:</h2>
 
-      <form action="/consinformeprece" method="post">
-        <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="cursoid" name="cursoid">
+      <table class="table table-responsive container-fluid">
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Fecha</th>
+                <th>Tipo de clase</th>
+                <th>Presente</th>
+                <th>Justificacion</th>
+            </tr>
+        </thead>
+
+      <form action="/asisreg" method="post">
+          <tbody class="table-group-divider">
             {%for i in r %}
-                <option value="{{estudiantes[i].id}}">{{estudiantes[i].apellido}} {{estudiantes[i].nombre}}</option>
-            {%endfor%}
-        </select>
-
-        <h2>Ingrese fecha:</h2>
-
-        <div class="form-floating mb-3">
-          <input type="date" class="form-control" id="floatingInput" placeholder="name@example.com">
-          <label for="floatingInput">Fecha</label>
-        </div>
-
-        <h2>Seleccione el tipo de clase:</h2>
-
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="tipo" id="aula" value="s">
-          <label class="form-check-label-outline-primary" for="aula">
-            Aula
-          </label>
-        </div>
-
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="tipo" id="fisica" checked value="n">
-          <label class="form-check-label" for="ffisica">
-            Ed. Fisica
-          </label>
-        </div>
-
-        <h2>Seleccione la asistencia:</h2>
-
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="s">
-          <label class="form-check-label" for="flexRadioDefault1">
-            Asistio
-          </label>
-        </div>
-
-        <div class="form-check form-check-inline ">
-          <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked value="n">
-          <label class="form-check-label" for="flexRadioDefault2">
-            No Asistio
-          </label>
-        </div>
-        
-        <h2>Ingrese justificación:</h2>
-
-        <div class="form-floating mb-3">
-          <input type="text" class="form-control" id="floatingInput" placeholder="name@example.com">
-          <label for="floatingInput">Justificacion</label>
-        </div>
-
-        <button class="btn btn-primary w-100 py-2"  type="submit">Consultar asistencia</button>
+              <tr>
+                  <td>
+                    {{estudiantes[i].apellido}} {{estudiantes[i].nombre}}
+                  </td>
+                  <td>
+                    <div class="form-floating mb-3">
+                      <input type="date" class="form-control" id="fe{{i}}" name="fe{{i}}" >
+                      <label for="fe{{i}}">Fecha</label>
+                    </div>
+                  </td>
+                  <td>
+                    <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="tipo{{[i]}}" name="tipo{{i}}">
+                          <option value="1">Aula</option>
+                          <option value="2">Ed.Fisica</option>
+                  </select>          
+                  </td>
+                  <td>
+                    <select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="asis{{i}}" name="asis{{i}}">
+                      <option value="s">Asistio</option>
+                      <option value="n"> No Asistio</option>
+                  </td>
+                  <td>
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="justi{{i}}" name="justi{{i}}">
+                      <label for="justi{{i}}">Justificacion</label>
+                    </div>
+                  </td>
+              </tr>
+              {%endfor%}
+          </tbody>
+      </table>
+        <button class="btn btn-primary w-100 py-2"  type="submit">Cargar Asistencia</button>
       </form>
-
       
+      {% for message in get_flashed_messages() %}
+        <div class="alert alert-success" role="alert">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
       
 </main>
 <script src="/static/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
